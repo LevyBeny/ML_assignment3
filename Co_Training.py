@@ -5,10 +5,10 @@ import numpy as np
 
 class Co_Training_Classifier:
 
-    def __init__(self, base_model=SVC(probability=True), num_of_iter=0, instance_per_iter=0):
+    def __init__(self, base_model=SVC(probability=True), K=0, G=0):
         self.base_model = base_model
-        self.num_of_iter = num_of_iter
-        self.instance_per_iter = instance_per_iter
+        self.K = K
+        self.G = G
         self.view1_features = None
         self.view2_features = None
         self.h1=None
@@ -35,7 +35,7 @@ class Co_Training_Classifier:
         U2_indices = [range(len(U2))]
 
         # iteratively add more labeled data
-        for k in range(self.num_of_iter):
+        for k in range(self.K):
             # create deep copy of the base model
             h1 = deepcopy(self.base_model)
             h2 = deepcopy(self.base_model)
@@ -89,7 +89,7 @@ class Co_Training_Classifier:
 
         tuples = np.array(tuples)
         tuples = tuples[tuples[:, 1].argsort()]
-        indices = tuples[-self.instance_per_iter:, 0]
+        indices = tuples[-self.G:, 0]
 
         indices=indices.astype(np.int)
         res = []
