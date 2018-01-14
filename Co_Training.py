@@ -101,15 +101,17 @@ class Co_Training_Classifier:
     # other view features
     def extract_from_unlabeled(self, U, top, view_features, U_indices, unlabeled_X):
 
-        U_indices = [index for index in U_indices if index not in top[:,0]]
         L_X = None
         L_y = np.array([])
         for tuple in top:  # tuple -> (index,label)
-            instance = unlabeled_X[int(tuple[0]),view_features]
+            instance = unlabeled_X[U_indices[int(tuple[0])],view_features]
             if L_X is None:
                 L_X=np.array([instance])
             else:
                 L_X = np.append(L_X, [instance], axis=0)
             L_y = np.append(L_y, np.array([tuple[1]]), axis=0)
 
+            del U[int(tuple[0])]
+
+        U_indices = [index for index in U_indices if index not in top[:, 0]]
         return L_X, L_y ,U_indices
