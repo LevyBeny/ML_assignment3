@@ -76,7 +76,7 @@ def extract_data(file_path, file_name):
         for column_name, column_type in data.dtypes.iteritems():
             labels=data[column_name].unique()
             new_col = encoder.fit_transform(data[column_name])
-            if(column_name not in ['age', 'fnlwgt','capital.gain','capital.loss','education.num','hours.per.week','income']):
+            if(column_name not in ['age', 'fnlwgt','occupation','education','capital.gain','capital.loss','education.num','hours.per.week','income']):
                 new_col = onehotencoder.fit_transform(new_col.reshape(-1,1))
                 labels[...]=column_name+'_'+labels[...]
                 new_col = pd.DataFrame(new_col.toarray(),columns=labels)
@@ -86,10 +86,11 @@ def extract_data(file_path, file_name):
                 data[column_name]=new_col
 
         y=np.array(data['income'])
+        y=y[:int((len(data))*0.25)]
         del data['income']
         data = np.array(data)
 
-        X = data[:, :]
+        X = data[:int((len(data))*0.25), :]
         view1_features = [i for i in range(0, len(X[0]), 2)]
         view2_features = [i for i in range(len(X[0])) if i not in view1_features]
 
