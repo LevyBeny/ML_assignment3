@@ -113,3 +113,5 @@ class Co_Training_Classifier:
             L_y = np.append(L_y, np.array([tuple[1]]), axis=0)
 
         return L_X, L_y ,U_indices
+
+
