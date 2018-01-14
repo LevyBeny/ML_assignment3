@@ -34,12 +34,12 @@ def calc_G_and_k(unlabeled_size):
     return K, G
 
 
-def evaluate_co_model(X_labeled, X_unlabeled, y_labeled, X_test, y_test, view1, view2,isSVM=True):
+def evaluate_co_model(X_labeled, X_unlabeled, y_labeled, X_test, y_test, view1, view2, isSVM=True):
     K, G = calc_G_and_k(X_unlabeled.shape[0])
     if isSVM:
         co_model = Co_Training.Co_Training_Classifier(K=K, G=G)
     else:
-        co_model = Co_Training.Co_Training_Classifier(base_model=RandomForestClassifier(),K=K, G=G)
+        co_model = Co_Training.Co_Training_Classifier(base_model=RandomForestClassifier(), K=K, G=G)
 
     # train the co-training model
     start = datetime.now()
@@ -60,17 +60,17 @@ def evaluate_co_model(X_labeled, X_unlabeled, y_labeled, X_test, y_test, view1, 
     return co_fit_time, co_predict_time, co_f1, co_acc
 
 
-def evaluate_regular_model(X_labeled, y_labeled, X_test, y_test,isSVM=True):
+def evaluate_regular_model(X_labeled, y_labeled, X_test, y_test, isSVM=True):
     if isSVM:
-        model=SVC()
+        model = SVC()
     else:
         model = RandomForestClassifier()
 
     # train
     start = datetime.now()
-    model.fit(X_labeled,y_labeled)
-    end=datetime.now()
-    fit_time=(end-start).total_seconds()
+    model.fit(X_labeled, y_labeled)
+    end = datetime.now()
+    fit_time = (end - start).total_seconds()
 
     # predict
     start = datetime.now()
@@ -85,12 +85,10 @@ def evaluate_regular_model(X_labeled, y_labeled, X_test, y_test,isSVM=True):
     return fit_time, predict_time, f1, acc
 
 
-
-
-def cross_validation(data_path, cv=10,isSVM=True):
+def cross_validation(data_path, cv=10, isSVM=True):
     X, y, view1, view2 = extract_data(data_path)
-    avg_co_fit_time, avg_co_predict_time, avg_co_f1, avg_co_acc=0,0,0,0
-    avg_reg_fit_time, avg_reg_predict_time, avg_reg_f1, avg_reg_acc=0,0,0,0
+    avg_co_fit_time, avg_co_predict_time, avg_co_f1, avg_co_acc = 0, 0, 0, 0
+    avg_reg_fit_time, avg_reg_predict_time, avg_reg_f1, avg_reg_acc = 0, 0, 0, 0
 
     for i in range(cv):
         X, y = shuffle(X, y)
@@ -100,37 +98,37 @@ def cross_validation(data_path, cv=10,isSVM=True):
         co_fit_time, co_predict_time, co_f1, co_acc = evaluate_co_model(X_labeled, X_unlabeled,
                                                                         y_labeled, X_test,
                                                                         y_test, view1,
-                                                                        view2,isSVM)
+                                                                        view2, isSVM)
 
-        reg_fit_time, reg_predict_time, reg_f1, reg_acc = evaluate_regular_model( X_labeled,y_labeled,
-                                                                                  X_test,y_test,isSVM)
+        reg_fit_time, reg_predict_time, reg_f1, reg_acc = evaluate_regular_model(X_labeled, y_labeled,
+                                                                                 X_test, y_test, isSVM)
 
-        avg_co_fit_time=avg_co_fit_time+(1/cv)*co_fit_time
-        avg_co_predict_time=avg_co_predict_time+(1/cv)*co_predict_time
-        avg_co_f1=avg_co_f1+(1/cv)*co_f1
-        avg_co_acc=avg_co_acc+(1/cv)*co_acc
+        avg_co_fit_time = avg_co_fit_time + (1 / cv) * co_fit_time
+        avg_co_predict_time = avg_co_predict_time + (1 / cv) * co_predict_time
+        avg_co_f1 = avg_co_f1 + (1 / cv) * co_f1
+        avg_co_acc = avg_co_acc + (1 / cv) * co_acc
 
-        avg_reg_fit_time=avg_reg_fit_time+(1/cv)*reg_fit_time
-        avg_reg_predict_time=avg_reg_predict_time+(1/cv)*reg_predict_time
-        avg_reg_f1=avg_reg_f1+(1/cv)*reg_f1
-        avg_reg_acc=avg_reg_acc+(1/cv)*reg_acc
+        avg_reg_fit_time = avg_reg_fit_time + (1 / cv) * reg_fit_time
+        avg_reg_predict_time = avg_reg_predict_time + (1 / cv) * reg_predict_time
+        avg_reg_f1 = avg_reg_f1 + (1 / cv) * reg_f1
+        avg_reg_acc = avg_reg_acc + (1 / cv) * reg_acc
 
     if isSVM:
-        res_path=re.sub(r".csv", "_SVM.txt", data_path)
+        res_path = re.sub(r".csv", "_SVM.txt", data_path)
     else:
         res_path = re.sub(r".csv", "_RF.txt", data_path)
-    with open("./results/"+res_path, 'w') as f:
+    with open("./results/" + res_path, 'w') as f:
         f.write("Co-training results:\n")
-        f.write("Fit Time: "+str(avg_co_fit_time)+"\n")
-        f.write("Predict Time: " + str(avg_co_predict_time)+"\n")
-        f.write("Accuracy Score: " + str(avg_co_acc)+"\n")
-        f.write("F1 Score: " + str(avg_co_f1)+"\n")
+        f.write("Fit Time: " + str(avg_co_fit_time) + "\n")
+        f.write("Predict Time: " + str(avg_co_predict_time) + "\n")
+        f.write("Accuracy Score: " + str(avg_co_acc) + "\n")
+        f.write("F1 Score: " + str(avg_co_f1) + "\n")
 
         f.write("Regular results:\n")
-        f.write("Fit Time: "+str(avg_reg_fit_time)+"\n")
-        f.write("Predict Time: " + str(avg_reg_predict_time)+"\n")
-        f.write("Accuracy Score: " + str(avg_reg_acc)+"\n")
-        f.write("F1 Score: " + str(avg_reg_f1)+"\n")
+        f.write("Fit Time: " + str(avg_reg_fit_time) + "\n")
+        f.write("Predict Time: " + str(avg_reg_predict_time) + "\n")
+        f.write("Accuracy Score: " + str(avg_reg_acc) + "\n")
+        f.write("F1 Score: " + str(avg_reg_f1) + "\n")
 
 
 directory_in_str = "./data"
@@ -139,5 +137,5 @@ directory = os.fsencode(directory_in_str)
 # loop on all the files
 for file in os.listdir(directory):
     file_name = os.fsdecode(file)
-    cross_validation(file_name,isSVM=True)
+    cross_validation(file_name, isSVM=True)
     cross_validation(file_name, isSVM=False)
