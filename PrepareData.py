@@ -68,7 +68,6 @@ def extract_data(file_path, file_name):
             else:
                 data[column_name]=new_col
 
-        ben=4
         y=data['income']
         del data['income']
         data = np.array(data)

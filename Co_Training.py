@@ -31,8 +31,8 @@ class Co_Training_Classifier:
         U2 = unlabeled_X[:,view2_features]
 
         # create list of instances indices for each of classifiers unlabeled data
-        U1_indices = [range(len(U1))]
-        U2_indices = [range(len(U2))]
+        U1_indices = [i for i in range(len(U1))]
+        U2_indices = [i for i in range(len(U2))]
 
         # iteratively add more labeled data
         for k in range(self.K):
@@ -50,8 +50,8 @@ class Co_Training_Classifier:
             res2 = h2.predict(U2)
             top_1 = self.extract_topG(res1, prob1)
             top_2 = self.extract_topG(res2, prob2)
-            L1_new_X, L1_new_y,U2_indices = self.extract_from_unlabeled(U2, top_2, view1_features, U2_indices, unlabeled_X)
-            L2_new_X, L2_new_y ,U1_indices= self.extract_from_unlabeled(U1, top_1, view2_features, U1_indices, unlabeled_X)
+            L1_new_X, L1_new_y,U2,U2_indices = self.extract_from_unlabeled(U2, top_2, view1_features, U2_indices, unlabeled_X)
+            L2_new_X, L2_new_y ,U1,U1_indices= self.extract_from_unlabeled(U1, top_1, view2_features, U1_indices, unlabeled_X)
 
             # append the new labeled instances
             L1_X = np.append(L1_X,L1_new_X,axis=0)
@@ -103,17 +103,19 @@ class Co_Training_Classifier:
 
         L_X = None
         L_y = np.array([])
+        indices_to_del=[]
         for tuple in top:  # tuple -> (index,label)
-            instance = unlabeled_X[U_indices[int(tuple[0])],view_features]
+            index=U_indices[int(tuple[0])]
+            instance = unlabeled_X[index,view_features]
             if L_X is None:
                 L_X=np.array([instance])
             else:
                 L_X = np.append(L_X, [instance], axis=0)
             L_y = np.append(L_y, np.array([tuple[1]]), axis=0)
+            indices_to_del.append(int(tuple[0]))
 
-            del U[int(tuple[0])]
-
+        U=np.delete(U,indices_to_del,0)
         U_indices = [index for index in U_indices if index not in top[:, 0]]
-        return L_X, L_y ,U_indices
+        return L_X, L_y , U ,U_indices
 
 
